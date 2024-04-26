@@ -1,3 +1,65 @@
+import { DateValue } from '@internationalized/date';
+
+// ****************************************************************
+// Firstname
+// ****************************************************************
+
+export type Firstname = string;
+
+// ****************************************************************
+// Lastname
+// ****************************************************************
+
+export type Lastname = string;
+
+// ****************************************************************
+// Startdate
+// ****************************************************************
+
+export type Startdate = DateValue;
+
+// ****************************************************************
+// Department
+// ****************************************************************
+
+export const departments = [
+  'Sales',
+  'Marketing',
+  'Engineering',
+  'Human Resources',
+  'Legal',
+] as const;
+
+export type Department = (typeof departments)[number];
+export type Departments = Department[];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isDepartment = (department: any): department is Department => {
+  return departments.includes(department);
+};
+
+// ****************************************************************
+// Birthdate
+// ****************************************************************
+
+export type Birthdate = DateValue;
+
+// ****************************************************************
+// Street
+// ****************************************************************
+
+export type Street = string;
+
+// ****************************************************************
+// City
+// ****************************************************************
+
+export type City = string;
+
+// ****************************************************************
+// State
+// ****************************************************************
+
 export const states = [
   {
     name: 'Alabama',
@@ -244,3 +306,9 @@ export type States = State[];
 export const isState = (state: any): state is State => {
   return states.includes(state) || states.some(({ name }) => name === state);
 };
+
+// ****************************************************************
+// Zipcode
+// ****************************************************************
+
+export type Zipcode = number;

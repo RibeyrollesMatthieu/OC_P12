@@ -1,19 +1,30 @@
-import { departments, isDepartment } from '@/utils/departments';
-import { isState, states } from '@/utils/states';
 import { Input, DatePicker, Select, SelectItem, Button } from '@nextui-org/react';
 import { FormEvent, useCallback, useMemo, useState } from 'react';
-import { CalendarDate } from '@internationalized/date';
+import {
+  isState,
+  isDepartment,
+  states,
+  departments,
+  Birthdate,
+  Startdate,
+  Firstname,
+  Lastname,
+  Street,
+  City,
+  Zipcode,
+  Department,
+} from '@/types/employee';
 
 export const CreateEmployeeForm = () => {
-  const [firstname, setFirstname] = useState<string>('');
-  const [lastname, setLastname] = useState<string>('');
-  const [birthdate, setBirthdate] = useState<CalendarDate>();
-  const [startdate, setStartdate] = useState<CalendarDate>();
-  const [street, setStreet] = useState<string>('');
-  const [city, setCity] = useState<string>('');
+  const [firstname, setFirstname] = useState<Firstname>('');
+  const [lastname, setLastname] = useState<Lastname>('');
+  const [birthdate, setBirthdate] = useState<Birthdate>();
+  const [startdate, setStartdate] = useState<Startdate>();
+  const [street, setStreet] = useState<Street>();
+  const [city, setCity] = useState<City>();
   const [state, setState] = useState<string>('');
-  const [zipcode, setZipcode] = useState<number>();
-  const [department, setDepartment] = useState<string>('');
+  const [zipcode, setZipcode] = useState<Zipcode>();
+  const [department, setDepartment] = useState<Department>();
 
   const isSubmittable = useMemo(() => {
     if (
@@ -116,7 +127,7 @@ export const CreateEmployeeForm = () => {
           placeholder=' '
           isRequired
           selectedKeys={[state]}
-          onChange={(e) => setState(e.target.value)}>
+          onChange={({ target: { value } }) => setState(value)}>
           {states.map(({ name }) => (
             <SelectItem key={name}>{name}</SelectItem>
           ))}
@@ -136,8 +147,8 @@ export const CreateEmployeeForm = () => {
         label='Department'
         labelPlacement='outside'
         isRequired
-        selectedKeys={[department]}
-        onChange={(e) => setDepartment(e.target.value)}>
+        selectedKeys={[department as string]}
+        onChange={({ target: { value } }) => setDepartment(value as Department)}>
         {departments.map((department) => (
           <SelectItem key={department}>{department}</SelectItem>
         ))}

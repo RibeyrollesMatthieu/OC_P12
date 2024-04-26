@@ -1,11 +1,20 @@
 export const employeeRoutes = {
   children: [
     {
-      path: '/employee-list',
+      path: '/',
       lazy: async () => {
-        const { EmployeeList } = await import('@/pages/EmployeeList');
-        return { Component: EmployeeList };
+        const { AppLayout } = await import('@/components/layout/App');
+        return { Component: AppLayout };
       },
+      children: [
+        {
+          path: 'employee-list',
+          lazy: async () => {
+            const { EmployeeList } = await import('@/pages/EmployeeList');
+            return { Component: EmployeeList };
+          },
+        },
+      ],
     },
   ],
 };
