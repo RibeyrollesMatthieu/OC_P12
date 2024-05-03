@@ -109,6 +109,7 @@ export const CreateEmployeeForm = () => {
         value={birthdate}
         onChange={setBirthdate}
       />
+
       <DatePicker
         label='Start date'
         labelPlacement='outside'

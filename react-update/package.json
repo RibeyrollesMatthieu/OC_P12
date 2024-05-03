@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@internationalized/date": "^3.5.2",
-    "@nextui-org/react": "^2.3.5",
+    "@nextui-org/react": "^2.3.6",
     "@react-aria/i18n": "^3.10.2",
     "framer-motion": "^11.1.7",
     "react": "^18.2.0",
