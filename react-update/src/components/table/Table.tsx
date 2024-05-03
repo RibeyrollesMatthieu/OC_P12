@@ -109,7 +109,7 @@ export const Table = ({ columns, rows }: Props) => {
 
       <TableBody items={items} emptyContent='No data available in table'>
         {(item: ITableRow) => (
-          <TableRow key={item.key}>
+          <TableRow key={`${item.firstname}-${item.lastname}`}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}

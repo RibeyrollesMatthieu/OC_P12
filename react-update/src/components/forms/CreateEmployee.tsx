@@ -13,7 +13,9 @@ import {
   City,
   Zipcode,
   Department,
+  getState,
 } from '@/types/employee';
+import { useEmployeesStore } from '@/states/employees';
 
 export const CreateEmployeeForm = () => {
   const [firstname, setFirstname] = useState<Firstname>('');
@@ -25,6 +27,8 @@ export const CreateEmployeeForm = () => {
   const [state, setState] = useState<string>('');
   const [zipcode, setZipcode] = useState<Zipcode>();
   const [department, setDepartment] = useState<Department>();
+
+  const addEmployee = useEmployeesStore((state) => state.add);
 
   const isSubmittable = useMemo(() => {
     if (
@@ -42,25 +46,39 @@ export const CreateEmployeeForm = () => {
     }
 
     return true;
-  }, [
-    birthdate,
-    city?.length,
-    department,
-    firstname?.length,
-    lastname?.length,
-    startdate,
-    state,
-    street?.length,
-    zipcode,
-  ]);
+  }, [birthdate, city, department, firstname, lastname, startdate, state, street, zipcode]);
 
   const handleSubmit = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
       if (!isSubmittable) return;
+
+      addEmployee({
+        firstname,
+        lastname,
+        birthdate: birthdate!,
+        startdate: startdate!,
+        city: city!,
+        department: department!,
+        state: getState(state),
+        street: street!,
+        zipcode: zipcode!,
+      });
     },
-    [isSubmittable]
+    [
+      addEmployee,
+      birthdate,
+      city,
+      department,
+      firstname,
+      isSubmittable,
+      lastname,
+      startdate,
+      state,
+      street,
+      zipcode,
+    ]
   );
 
   return (

@@ -1,28 +1,7 @@
-import {
-  Firstname,
-  Lastname,
-  Startdate,
-  Department,
-  Birthdate,
-  Street,
-  City,
-  State,
-  Zipcode,
-} from '@/types/employee';
+import { Employee } from '@/types/employee';
 import { ReactNode } from 'react';
 
-export interface ITableRow {
-  key: string;
-  firstname: Firstname;
-  lastname: Lastname;
-  startdate: Startdate;
-  department: Department;
-  birthdate: Birthdate;
-  street: Street;
-  city: City;
-  state: State;
-  zipcode: Zipcode;
-}
+export interface ITableRow extends Employee {}
 
 export type ITableRows = ITableRow[];
 

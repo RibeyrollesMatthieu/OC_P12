@@ -1,15 +1,15 @@
-import { Table, TableColumns, TableRows } from '@/components/table/Table';
+import { Table } from '@/components/table/Table';
+import { useEmployeesStore } from '@/states/employees';
 import { Birthdate, Startdate, State } from '@/types/employee';
+import { ITableColumns } from '@/types/table';
 import { getLocalTimeZone } from '@internationalized/date';
 import { Link } from '@nextui-org/react';
 import { useDateFormatter } from '@react-aria/i18n';
 import { useMemo } from 'react';
 
-// MOCKED DATA
-const rows: TableRows = [];
-
 export const EmployeeList = () => {
   const formatter = useDateFormatter({ dateStyle: 'full' });
+  const employees = useEmployeesStore((state) => state.employees);
 
   const columns = useMemo(() => {
     return [
@@ -53,7 +53,7 @@ export const EmployeeList = () => {
         label: 'Zipcode',
       },
     ];
-  }, [formatter]) as TableColumns;
+  }, [formatter]) as ITableColumns;
 
   return (
     <>
@@ -61,7 +61,7 @@ export const EmployeeList = () => {
         <h1 className='text-3xl font-semibold'>Current employees</h1>
       </div>
 
-      <Table columns={columns} rows={rows} />
+      <Table columns={columns} rows={employees} />
 
       <div className='text-center my-8'>
         <Link href='/' className='my-2'>

@@ -301,6 +301,7 @@ export const states = [
 
 export type State = (typeof states)[number];
 export type States = State[];
+export const getState = (name: string): State => [states.find((state) => state.name === name)][0]!;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isState = (state: any): state is State => {
@@ -312,3 +313,17 @@ export const isState = (state: any): state is State => {
 // ****************************************************************
 
 export type Zipcode = number;
+
+export interface Employee {
+  firstname: Firstname;
+  lastname: Lastname;
+  startdate: Startdate;
+  department: Department;
+  birthdate: Birthdate;
+  street: Street;
+  city: City;
+  state: State;
+  zipcode: Zipcode;
+}
+
+export type Employees = Employee[];
