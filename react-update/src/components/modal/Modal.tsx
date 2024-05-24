@@ -1,4 +1,4 @@
-import { useModalsStore } from '@/states/modals';
+import { Cross } from '@/components/icons/Cross';
 import { IModal, IModalOptions, modalDefaultOptions } from '@/types/modal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -16,8 +16,7 @@ export const Modal = ({
   const modal = useRef<HTMLDivElement>(null);
   const [options, setOptions] = useState<IModalOptions>(defaultOptions);
 
-  const { getCurrent, close: providerClose, isActive, selectCurrent } = useModalsStore();
-
+  // initialize body and options
   useEffect(() => {
     if (!document) return;
 
@@ -28,48 +27,56 @@ export const Modal = ({
       ...options,
       doFade: !isNaN(parseInt(options.fadeDuration, 10)),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultOptions]);
 
+  // displays the background (aka block) behind the modal + disable body scrolling
   const block = useCallback(() => {
     if (!body) return;
 
     body.style.overflow = 'hidden';
 
-    selectCurrent();
+    if (!blocker.current) return;
 
-    if (options.doFade && blocker.current) {
+    if (options.doFade) {
       blocker.current.style.opacity = '0';
       blocker.current.animate([{ opacity: '0' }, { opacity: '1' }], {
         duration: +options.fadeDuration,
         fill: 'forwards',
       });
+    } else {
+      blocker.current.style.opacity = '1';
     }
-  }, [blocker, body, options.doFade, options.fadeDuration, selectCurrent]);
+  }, [blocker, body, options.doFade, options.fadeDuration]);
 
+  // removes the background (aka block) behind the modal + enable body scrolling
   const unblock = useCallback(
     async (now: boolean = false) => {
       return new Promise((resolve) => {
         if (!body) return;
+        if (!blocker.current) return;
 
-        if (!now && options.doFade && blocker.current) {
+        if (!now && options.doFade) {
           blocker.current.style.opacity = '1';
           const animation = blocker.current.animate([{ opacity: '1' }, { opacity: '0' }], {
             duration: +options.fadeDuration,
             fill: 'forwards',
           });
           animation.onfinish = resolve;
+        } else {
+          blocker.current.style.opacity = '0';
+          resolve(undefined);
         }
 
-        selectCurrent();
-
-        if (!isActive() && body) {
+        if (body) {
           body.style.overflow = '';
         }
       });
     },
-    [body, isActive, options.doFade, options.fadeDuration, selectCurrent]
+    [body, options.doFade, options.fadeDuration]
   );
 
+  // displays the modal
   const show = useCallback(() => {
     if (!modal.current) return;
 
@@ -84,51 +91,49 @@ export const Modal = ({
       );
     } else {
       modal.current.style.display = 'inline-block';
+      modal.current.style.opacity = '1';
     }
-
-    //  this.$elm.trigger($.modal.OPEN, [this._ctx()]);
   }, [options.doFade, options.fadeDuration, options.showClose]);
 
-  const hide = useCallback(async () => {
-    return new Promise((resolve) => {
-      if (isCloseButtonVisible) setIsCloseButtonVisible(false);
-      if (!modal.current) return;
+  // hide the modal
+  // const hide = useCallback(async () => {
+  //   return new Promise((resolve) => {
+  //     if (isCloseButtonVisible) setIsCloseButtonVisible(false);
+  //     if (!modal.current) return;
 
-      if (options.doFade) {
-        modal.current.style.opacity = '1';
-        const animation = modal.current.animate([{ opacity: '1' }, { opacity: '0' }], {
-          duration: +options.fadeDuration,
-          fill: 'forwards',
-        });
+  //     if (options.doFade) {
+  //       modal.current.style.opacity = '1';
+  //       const animation = modal.current.animate([{ opacity: '1' }, { opacity: '0' }], {
+  //         duration: +options.fadeDuration,
+  //         fill: 'forwards',
+  //       });
 
-        animation.onfinish = resolve;
-      } else {
-        modal.current.style.display = 'none';
-      }
-    });
-  }, [isCloseButtonVisible, options.doFade, options.fadeDuration]);
+  //       animation.onfinish = resolve;
+  //     } else {
+  //       modal.current.style.display = 'none';
+  //     }
+  //   });
+  // }, [isCloseButtonVisible, options.doFade, options.fadeDuration]);
 
+  // handle escape key
   const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      const current = getCurrent();
-      if (event.code === 'Escape' && options.escapeClose && current) current.close();
+    (event: KeyboardEvent, callback: () => void) => {
+      if (event.code === 'Escape' && options.escapeClose) callback();
     },
-    [getCurrent, options.escapeClose]
+    [options.escapeClose]
   );
 
+  // call all the closing functions
   const close = useCallback(() => {
-    providerClose();
-
     // TODO: debug hide
     Promise.all([unblock()]).then(() => {
       if (onClose) onClose();
     });
 
-    if (isActive()) {
-      document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [handleKeyDown, isActive, onClose, providerClose, unblock]);
+    document.removeEventListener('keydown', (e) => handleKeyDown(e, close));
+  }, [handleKeyDown, onClose, unblock]);
 
+  // call all the opening functions
   const open = useCallback(() => {
     block();
     if (options?.doFade) {
@@ -138,8 +143,8 @@ export const Modal = ({
     } else {
       show();
     }
-    document.removeEventListener('keydown', handleKeyDown);
-    document.addEventListener('keydown', handleKeyDown);
+    document.removeEventListener('keydown', (e) => handleKeyDown(e, close));
+    document.addEventListener('keydown', (e) => handleKeyDown(e, close));
     if (options.clickClose) {
       blocker.current?.addEventListener('click', (event: MouseEvent) => {
         if (event.target === blocker.current) {
@@ -186,22 +191,7 @@ export const Modal = ({
 
           {options.showClose && isCloseButtonVisible && (
             <button onClick={close} className={`close-modal ml-auto ${options.closeClass ?? ''}`}>
-              <svg
-                className='w-6 h-6 text-gray-800'
-                aria-hidden='true'
-                xmlns='http://www.w3.org/2000/svg'
-                width='24'
-                height='24'
-                fill='none'
-                viewBox='0 0 24 24'>
-                <path
-                  stroke='currentColor'
-                  stroke-linecap='round'
-                  stroke-linejoin='round'
-                  stroke-width='2'
-                  d='M6 18 17.94 6M18 18 6.06 6'
-                />
-              </svg>
+              <Cross />
             </button>
           )}
         </header>

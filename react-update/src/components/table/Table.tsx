@@ -35,6 +35,7 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
   type Item = (typeof items)[0];
   const hasSearchFilter = Boolean(searchValue);
 
+  // render a cell with custom styling
   const renderCell = useCallback(
     (item: ITableRow, columnKey: Key) => {
       const cellValue = item[columnKey as keyof ITableRow];
@@ -50,17 +51,6 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
     [columns]
   );
 
-  const pages = useMemo(() => {
-    return Math.ceil(rows.length / rowsPerPage);
-  }, [rows.length, rowsPerPage]);
-
-  const items = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-
-    return rows.slice(start, end);
-  }, [page, rowsPerPage, rows]);
-
   const getColumnSortFunction = useCallback(() => {
     if (!sortDescriptor || sortDescriptor.column === undefined) return null;
 
@@ -71,8 +61,9 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
     return column.sort;
   }, [columns, sortDescriptor]);
 
+  // returns items matching search input
   const filteredItems = useMemo(() => {
-    let _filteredItems = [...items];
+    let _filteredItems = [...rows];
 
     /* filters using search query */
     if (hasSearchFilter) {
@@ -91,12 +82,24 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
     }
 
     return _filteredItems;
-  }, [items, hasSearchFilter, searchKeys, searchValue]);
+  }, [rows, hasSearchFilter, searchKeys, searchValue]);
+
+  const pages = useMemo(() => {
+    return Math.ceil(filteredItems.length / rowsPerPage);
+  }, [filteredItems.length, rowsPerPage]);
+
+  // gets items for current page
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    return filteredItems.slice(start, end);
+  }, [page, rowsPerPage, filteredItems]);
 
   const sortedItems = useMemo(() => {
-    if (!sortDescriptor) return filteredItems;
+    if (!sortDescriptor) return items;
 
-    return [...filteredItems].sort((a, b) => {
+    return [...items].sort((a, b) => {
       if (sortDescriptor.column === undefined) return 0;
 
       const first = a[sortDescriptor.column as keyof Item];
@@ -110,7 +113,7 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
 
       return sortDescriptor.direction === 'descending' ? -cmp : cmp;
     });
-  }, [sortDescriptor, filteredItems, getColumnSortFunction]);
+  }, [sortDescriptor, items, getColumnSortFunction]);
 
   const onSearchChange = useCallback((value?: string) => {
     if (!value) {
@@ -122,29 +125,36 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
     setPage(1);
   }, []);
 
+  const onClear = useCallback(() => {
+    setSearchValue('');
+    setPage(1);
+  }, []);
+
   const bottomContent = useMemo(() => {
     return (
       <div className='flex'>
-        <p>
-          Showing {(page - 1) * rowsPerPage} to {(page - 1) * rowsPerPage + items.length} out of{' '}
-          {rows.length} entries
-        </p>
-        {rows.length > rowsPerPage && (
+        {filteredItems.length > 0 && (
+          <p>
+            Showing {(page - 1) * rowsPerPage + 1} to{' '}
+            {Math.min(page * rowsPerPage, filteredItems.length)} of {filteredItems.length} entries
+          </p>
+        )}
+        {filteredItems.length > rowsPerPage && (
           <div className='flex justify-center ml-auto'>
             <Pagination
               isCompact
               showControls
               showShadow
-              color='secondary'
+              color='primary'
               page={page}
               total={pages}
-              onChange={(page) => setPage(page)}
+              onChange={setPage}
             />
           </div>
         )}
       </div>
     );
-  }, [items.length, page, pages, rows.length, rowsPerPage]);
+  }, [filteredItems.length, page, pages, rowsPerPage]);
 
   const topContent = useMemo(() => {
     return (
@@ -155,10 +165,10 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
           entries
         </div>
 
-        <Search search={searchValue} onSearchChange={onSearchChange} />
+        <Search search={searchValue} onSearchChange={onSearchChange} onClear={onClear} />
       </div>
     );
-  }, [onSearchChange, rowsPerPage, searchValue]);
+  }, [onClear, onSearchChange, rowsPerPage, searchValue]);
 
   return (
     <NuiTable
