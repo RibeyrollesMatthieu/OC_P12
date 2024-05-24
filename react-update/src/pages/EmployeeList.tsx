@@ -25,6 +25,12 @@ export const EmployeeList = () => {
         key: 'startdate',
         label: 'Start Date',
         render: (date: Startdate) => <>{formatter.format(date.toDate(getLocalTimeZone()))}</>,
+        sort: (a: Startdate, b: Startdate) => {
+          const dateA = formatter.format(a.toDate(getLocalTimeZone()));
+          const dateB = formatter.format(b.toDate(getLocalTimeZone()));
+
+          return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+        },
       },
       {
         key: 'department',
@@ -34,6 +40,12 @@ export const EmployeeList = () => {
         key: 'birthdate',
         label: 'Date of birth',
         render: (date: Birthdate) => <>{formatter.format(date.toDate(getLocalTimeZone()))}</>,
+        sort: (a: Birthdate, b: Birthdate) => {
+          const dateA = formatter.format(a.toDate(getLocalTimeZone()));
+          const dateB = formatter.format(b.toDate(getLocalTimeZone()));
+
+          return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+        },
       },
       {
         key: 'street',
@@ -47,6 +59,8 @@ export const EmployeeList = () => {
         key: 'state',
         label: 'State',
         render: (state: State) => <>{state.abbreviation}</>,
+        sort: (a: State, b: State) =>
+          a.abbreviation < b.abbreviation ? -1 : a.abbreviation > b.abbreviation ? 1 : 0,
       },
       {
         key: 'zipcode',
@@ -61,7 +75,7 @@ export const EmployeeList = () => {
         <h1 className='text-3xl font-semibold'>Current employees</h1>
       </div>
 
-      <Table columns={columns} rows={employees} />
+      <Table columns={columns} rows={employees} isStriped searchKeys={['firstname', 'lastname']} />
 
       <div className='text-center my-8'>
         <Link href='/' className='my-2'>

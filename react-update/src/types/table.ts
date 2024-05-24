@@ -9,6 +9,8 @@ export interface ITableColumn {
   key: string;
   label: string;
   render?: (cellValue: unknown, item: ITableRow) => ReactNode;
+  allowsSorting?: boolean;
+  sort?: (a: unknown, b: unknown) => number;
 }
 
 export type ITableColumns = ITableColumn[];

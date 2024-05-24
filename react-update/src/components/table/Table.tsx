@@ -11,22 +11,29 @@ import {
 import {
   Table as NuiTable,
   Pagination,
+  SortDescriptor,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
+  TableProps,
   TableRow,
 } from '@nextui-org/react';
 import { Key, useCallback, useMemo, useState } from 'react';
 
-interface Props {
+interface Props extends TableProps {
   columns: ITableColumns;
   rows: ITableRows;
+  searchKeys?: (keyof ITableRow)[];
 }
 
-export const Table = ({ columns, rows }: Props) => {
+export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
+  const [searchValue, setSearchValue] = useState('');
   const [page, setPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<IRowsPerPage>(rowsPerPageOptions[0]);
+  const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>();
+  type Item = (typeof items)[0];
+  const hasSearchFilter = Boolean(searchValue);
 
   const renderCell = useCallback(
     (item: ITableRow, columnKey: Key) => {
@@ -53,6 +60,67 @@ export const Table = ({ columns, rows }: Props) => {
 
     return rows.slice(start, end);
   }, [page, rowsPerPage, rows]);
+
+  const getColumnSortFunction = useCallback(() => {
+    if (!sortDescriptor || sortDescriptor.column === undefined) return null;
+
+    const column = columns.find((column) => column.key === sortDescriptor.column);
+
+    if (!column) return null;
+
+    return column.sort;
+  }, [columns, sortDescriptor]);
+
+  const filteredItems = useMemo(() => {
+    let _filteredItems = [...items];
+
+    /* filters using search query */
+    if (hasSearchFilter) {
+      _filteredItems = _filteredItems.filter((item) => {
+        let found = false;
+
+        searchKeys?.forEach((key) => {
+          if ((item[key] as string).toLowerCase().includes(searchValue.toLowerCase())) {
+            found = true;
+            return;
+          }
+        });
+
+        return found;
+      });
+    }
+
+    return _filteredItems;
+  }, [items, hasSearchFilter, searchKeys, searchValue]);
+
+  const sortedItems = useMemo(() => {
+    if (!sortDescriptor) return filteredItems;
+
+    return [...filteredItems].sort((a, b) => {
+      if (sortDescriptor.column === undefined) return 0;
+
+      const first = a[sortDescriptor.column as keyof Item];
+      const second = b[sortDescriptor.column as keyof Item];
+
+      const sortFunction = getColumnSortFunction();
+      let cmp;
+
+      if (sortFunction) cmp = sortFunction(first, second);
+      else cmp = first < second ? -1 : first > second ? 1 : 0;
+
+      return sortDescriptor.direction === 'descending' ? -cmp : cmp;
+    });
+  }, [sortDescriptor, filteredItems, getColumnSortFunction]);
+
+  const onSearchChange = useCallback((value?: string) => {
+    if (!value) {
+      setSearchValue('');
+      return;
+    }
+
+    setSearchValue(value);
+    setPage(1);
+  }, []);
 
   const bottomContent = useMemo(() => {
     return (
@@ -87,27 +155,29 @@ export const Table = ({ columns, rows }: Props) => {
           entries
         </div>
 
-        <Search />
+        <Search search={searchValue} onSearchChange={onSearchChange} />
       </div>
     );
-  }, [rowsPerPage]);
+  }, [onSearchChange, rowsPerPage, searchValue]);
 
   return (
     <NuiTable
-      bottomContentPlacement='outside'
       bottomContent={bottomContent}
-      topContentPlacement='outside'
+      bottomContentPlacement='outside'
       topContent={topContent}
-      isStriped>
+      topContentPlacement='outside'
+      sortDescriptor={sortDescriptor}
+      onSortChange={setSortDescriptor}
+      {...rest}>
       <TableHeader columns={columns}>
         {(column: ITableColumn) => (
-          <TableColumn allowsSorting key={column.key}>
+          <TableColumn allowsSorting={column.allowsSorting ?? true} key={column.key}>
             {column.label}
           </TableColumn>
         )}
       </TableHeader>
 
-      <TableBody items={items} emptyContent='No data available in table'>
+      <TableBody items={sortedItems} emptyContent='No data available in table'>
         {(item: ITableRow) => (
           <TableRow key={`${item.firstname}-${item.lastname}`}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}

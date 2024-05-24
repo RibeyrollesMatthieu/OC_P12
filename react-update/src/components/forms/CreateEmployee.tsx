@@ -17,7 +17,7 @@ import {
 } from '@/types/employee';
 import { useEmployeesStore } from '@/states/employees';
 
-export const CreateEmployeeForm = () => {
+export const CreateEmployeeForm = ({ onSubmit }: { onSubmit: () => void }) => {
   const [firstname, setFirstname] = useState<Firstname>('');
   const [lastname, setLastname] = useState<Lastname>('');
   const [birthdate, setBirthdate] = useState<Birthdate>();
@@ -65,6 +65,8 @@ export const CreateEmployeeForm = () => {
         street: street!,
         zipcode: zipcode!,
       });
+
+      onSubmit();
     },
     [
       addEmployee,
@@ -74,6 +76,7 @@ export const CreateEmployeeForm = () => {
       firstname,
       isSubmittable,
       lastname,
+      onSubmit,
       startdate,
       state,
       street,
