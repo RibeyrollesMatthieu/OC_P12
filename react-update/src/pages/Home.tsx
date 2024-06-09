@@ -1,7 +1,7 @@
 import { CreateEmployeeForm } from '@/components/forms/CreateEmployee';
-import { Modal } from '@/components/modal/Modal';
 import { Link } from '@nextui-org/react';
 import { useState } from 'react';
+import { Modal } from 'ribeyrollesmatthieu_modal';
 
 export const HomePage = () => {
   const [isModalOpened, setIsModalOpened] = useState<boolean>(false);

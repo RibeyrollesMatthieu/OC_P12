@@ -19,7 +19,7 @@ import {
   TableProps,
   TableRow,
 } from '@nextui-org/react';
-import { Key, useCallback, useMemo, useState } from 'react';
+import { Key, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Props extends TableProps {
   columns: ITableColumns;
@@ -130,13 +130,17 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
     setPage(1);
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [rowsPerPage]);
+
   const bottomContent = useMemo(() => {
     return (
       <div className='flex'>
         {filteredItems.length > 0 && (
           <p>
-            Showing {(page - 1) * rowsPerPage + 1} to{' '}
-            {Math.min(page * rowsPerPage, filteredItems.length)} of {filteredItems.length} entries
+            Showing {(page - 1) * rowsPerPage + 1} to {Math.min(page * rowsPerPage, items.length)}{' '}
+            of {filteredItems.length} entries
           </p>
         )}
         {filteredItems.length > rowsPerPage && (
@@ -154,7 +158,7 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
         )}
       </div>
     );
-  }, [filteredItems.length, page, pages, rowsPerPage]);
+  }, [filteredItems.length, items.length, page, pages, rowsPerPage]);
 
   const topContent = useMemo(() => {
     return (
@@ -189,7 +193,10 @@ export const Table = ({ columns, rows, searchKeys, ...rest }: Props) => {
 
       <TableBody items={sortedItems} emptyContent='No data available in table'>
         {(item: ITableRow) => (
-          <TableRow key={`${item.firstname}-${item.lastname}`}>
+          <TableRow
+            key={`${item.firstname}-${item.lastname}-${new Date().getUTCMilliseconds()}-${
+              Math.random() * 99999
+            }`}>
             {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
           </TableRow>
         )}
