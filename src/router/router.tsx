@@ -17,6 +17,13 @@ export const router = createBrowserRouter([
         },
       },
       employeeRoutes,
+      {
+        path: '*',
+        lazy: async () => {
+          const { NotFoundPage } = await import('@/pages/NotFound');
+          return { Component: NotFoundPage };
+        },
+      },
     ],
   },
 ]);
