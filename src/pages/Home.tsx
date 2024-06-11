@@ -10,7 +10,7 @@ export const HomePage = () => {
   return (
     <main className='max-w-96 w-[min(24rem,100%)] mx-auto pb-14'>
       <div className='text-center my-8'>
-        <Title label='HRnext' />
+        <Title label='HRnet' />
 
         <Link href='/employee-list' className='my-2'>
           View current employees
