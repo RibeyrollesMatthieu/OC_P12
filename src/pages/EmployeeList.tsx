@@ -1,4 +1,5 @@
 import { Table } from '@/components/table/Table';
+import { Title } from '@/components/title';
 import { useEmployeesStore } from '@/states/employees';
 import { Birthdate, Startdate, State } from '@/types/employee';
 import { ITableColumns } from '@/types/table';
@@ -72,7 +73,7 @@ export const EmployeeList = () => {
   return (
     <>
       <div className='text-center my-8'>
-        <h1 className='text-3xl font-semibold'>Current employees</h1>
+        <Title label='Current employees' />
       </div>
 
       <Table columns={columns} rows={employees} isStriped searchKeys={['firstname', 'lastname']} />

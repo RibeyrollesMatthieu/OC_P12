@@ -1,4 +1,5 @@
 import { CreateEmployeeForm } from '@/components/forms/CreateEmployee';
+import { Title } from '@/components/title';
 import { Link } from '@nextui-org/react';
 import { useState } from 'react';
 import { Modal } from 'ribeyrollesmatthieu_modal';
@@ -9,7 +10,7 @@ export const HomePage = () => {
   return (
     <main className='max-w-96 w-[min(24rem,100%)] mx-auto pb-14'>
       <div className='text-center my-8'>
-        <h1 className='text-3xl font-semibold'>HRnet</h1>
+        <Title label='HRnext' />
 
         <Link href='/employee-list' className='my-2'>
           View current employees
